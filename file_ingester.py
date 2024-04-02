@@ -1,5 +1,6 @@
 import csv
 import os
+import logging
 
 import streamlit as st
 from langchain.chains import RetrievalQA
@@ -19,9 +20,14 @@ jobpost_strs = []
 with open(file_path, 'r') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     
+    index = 0
     for row in csv_reader:
-        jobpost_str = row['jobpost']
-        jobpost_strs.append(jobpost_str)
+        if index < 4:
+            jobpost_str = row['jobpost']
+            jobpost_strs.append(jobpost_str)
+        index += 1
+
+logging.info("finished file appending")
 jobpost_combined_str = "".join(jobpost_strs)
 
 text_splitter = RecursiveCharacterTextSplitter(
@@ -30,6 +36,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 chunks = text_splitter.split_text(text=jobpost_combined_str)
 
+logging.info("finished splitting")
+
 # Store the chunks part in db (vector)
 vectorstore = Neo4jVector.from_texts(
     chunks,
@@ -37,10 +45,12 @@ vectorstore = Neo4jVector.from_texts(
     username=username,
     password=password,
     embedding=embeddings,
-    index_name="pdf_bot",
-    node_label="PdfBotChunk",
+    index_name="itkb",
+    node_label="JobPosting",
     pre_delete_collection=True,  # Delete existing PDF data
 )
+
+logging.info("finished index creation")
 
 qa = RetrievalQA.from_chain_type(
     llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever()
@@ -48,6 +58,7 @@ qa = RetrievalQA.from_chain_type(
 
 def main():
     query = st.text_input("Ask questions to the knowledge graph")
+    logging.info("finished QA display")
 
     if query:
         stream_handler = StreamHandler(st.empty())
