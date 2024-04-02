@@ -27,14 +27,5 @@ services:
           condition: service_healthy
         pull-model:
           condition: service_completed_successfully
-      x-develop:
-        watch:
-          - action: rebuild
-            path: .
-            ignore:
-              - loader.py
-              - bot.py
-              - api.py
-              - front-end/
       ports:
         - 8503:8503
