@@ -56,6 +56,29 @@ qa = RetrievalQA.from_chain_type(
     llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever()
 )
 
+try:
+    result = ""
+
+    if not payload.neo4j_schema:
+        extractor = DataExtractor(llm=llm)
+        result = extractor.run(data=payload.input)
+    else:
+        extractor = DataExtractorWithSchema(llm=llm)
+        result = extractor.run(schema=payload.neo4j_schema, data=payload.input)
+
+    print("Extracted result: " + str(result))
+
+    disambiguation = DataDisambiguation(llm=llm)
+    disambiguation_result = disambiguation.run(result)
+
+    print("Disambiguation result " + str(disambiguation_result))
+
+    return {"data": disambiguation_result}
+
+except Exception as e:
+    print(e)
+    return f"Error: {e}"
+
 def main():
     query = st.text_input("Ask questions to the knowledge graph")
     logging.info("finished QA display")
