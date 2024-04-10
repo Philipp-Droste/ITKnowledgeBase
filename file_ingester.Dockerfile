@@ -14,6 +14,11 @@ COPY file_ingester.py .
 COPY chains.py .
 COPY stream_handler.py .
 COPY job_posts.csv .
+COPY utils .
+COPY unstructured_data_extractor.py .
+COPY data_disambiguation.py .
+COPY base_component.py .
+COPY llms.py .
 
 EXPOSE 8503
 

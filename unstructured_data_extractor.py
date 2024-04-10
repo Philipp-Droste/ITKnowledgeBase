@@ -1,8 +1,8 @@
 import re
 from typing import List
 
-from components.base_component import BaseComponent
-from llm.basellm import BaseLLM
+from base_component import BaseComponent
+from llms import BaseLLM
 from utils.unstructured_data_utils import (
     nodesTextToListOfDict,
     relationshipTextToListOfDict,

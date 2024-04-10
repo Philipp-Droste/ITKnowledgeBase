@@ -7,11 +7,12 @@ from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import Neo4jVector
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from stream_handler import StreamHandler
-from chains import load_llm
+from llms import Llama2
 from unstructured_data_extractor import (
     DataExtractor,
     DataExtractorWithSchema,
 )
+from data_disambiguation import DataDisambiguation
 
 # url = os.getenv("NEO4J_URI")
 # username = os.getenv("NEO4J_USERNAME")
@@ -60,15 +61,17 @@ from unstructured_data_extractor import (
 #     llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever()
 # )
 
+neo4j_schema = ""
+input = "Bobby has 2 cats: one named Charles, and the other named Ivan. Ivan and Charles both don't like Danny, who is a Dog."
 llm = Llama2()
 
-
-if not payload.neo4j_schema:
+if not neo4j_schema:
+    print("running without schema")
     extractor = DataExtractor(llm=llm)
-    result = extractor.run(data=payload.input)
+    result = extractor.run(data=input)
 else:
     extractor = DataExtractorWithSchema(llm=llm)
-    result = extractor.run(schema=payload.neo4j_schema, data=payload.input)
+    result = extractor.run(schema=neo4j_schema, data=input)
 
 print("Extracted result: " + str(result))
 
@@ -78,12 +81,12 @@ disambiguation_result = disambiguation.run(result)
 print("Disambiguation result " + str(disambiguation_result))
 
 def main():
-    query = st.text_input("Ask questions to the knowledge graph")
-    logging.info("finished QA display")
+    # query = st.text_input("Ask questions to the knowledge graph")
+    # logging.info("finished QA display")
 
-    if query:
-        stream_handler = StreamHandler(st.empty())
-        qa.run(query, callbacks=[stream_handler])
+    # if query:
+    #     stream_handler = StreamHandler(st.empty())
+    #     qa.run(query, callbacks=[stream_handler])
 
 if __name__ == "__main__":
     main()
